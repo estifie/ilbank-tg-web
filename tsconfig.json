@@ -20,6 +20,8 @@
 		"paths": {
 			"@components/*": ["./src/components/*"],
 			"@interfaces/*": ["./src/interfaces/*"],
+			"@config/*": ["./src/config/*"],
+			"@context/*": ["./src/context/*"],
 			"@/*": ["./src/*"]
 		}
 	},
