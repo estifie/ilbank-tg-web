@@ -30,6 +30,7 @@ import {
 } from "@components/ui/dropdown-menu";
 import { Input } from "@components/ui/input";
 import { Data, ProgramType } from "@interfaces/data";
+import Link from "next/link";
 
 const data: Data[] = [
 	{
@@ -103,25 +104,6 @@ enum ColumnName {
 
 export const columns: ColumnDef<Data>[] = [
 	{
-		id: "select",
-		header: ({ table }) => (
-			<Checkbox
-				checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-				aria-label="Hepsini seç"
-			/>
-		),
-		cell: ({ row }) => (
-			<Checkbox
-				checked={row.getIsSelected()}
-				onCheckedChange={(value) => row.toggleSelected(!!value)}
-				aria-label="Bu satırı seç"
-			/>
-		),
-		enableSorting: false,
-		enableHiding: false,
-	},
-	{
 		accessorKey: "code",
 		header: ({ column }) => {
 			return (
@@ -145,7 +127,13 @@ export const columns: ColumnDef<Data>[] = [
 				</div>
 			);
 		},
-		cell: ({ row }) => <div className="capitalize text-left ml-4">{row.getValue("programName")}</div>,
+		cell: ({ row }) => (
+			<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
+				<Link href={`http://localhost:3000/public/${row.getValue("code")}.pdf`}>
+					{row.getValue("programName")}
+				</Link>
+			</div>
+		),
 	},
 	{
 		accessorKey: "programType",
@@ -174,36 +162,9 @@ export const columns: ColumnDef<Data>[] = [
 			return <div className="text-right">{convertUserTypesToString(userTypes)}</div>;
 		},
 	},
-	{
-		id: "actions",
-		enableHiding: false,
-		cell: ({ row }) => {
-			const payment = row.original;
-
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal className="h-4 w-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.code.toString())}>
-							Copy payment ID
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem>View customer</DropdownMenuItem>
-						<DropdownMenuItem>View payment details</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		},
-	},
 ];
 
-export default function DataTableDemo() {
+export default function ProgramListesi() {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
