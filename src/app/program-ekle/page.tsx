@@ -8,6 +8,7 @@ import { Button } from "@components/ui/button";
 import { Checkbox } from "@components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@components/ui/radio-group";
 
 const kullaniciTurListesi = [
@@ -33,6 +34,9 @@ const formSchema = z.object({
 		})
 		.max(255, {
 			message: "Program kodu en fazla 255 karakter olmalıdır.",
+		})
+		.refine((value) => /^SB\d+$/.test(value) || /^BB\d+$/.test(value), {
+			message: "Program kodu SB veya BB ile başlamalıdır.",
 		}),
 	programAdi: z
 		.string()
@@ -48,6 +52,12 @@ const formSchema = z.object({
 	programTuru: z.enum(["bb", "sb"], {
 		required_error: "Program türü seçmelisiniz.",
 	}),
+	file: z
+		.string()
+		.optional()
+		.refine((value) => value?.endsWith(".pdf"), {
+			message: "Bir PDF dosyası seçmelisiniz.",
+		}),
 });
 
 export default function ProgramEkle() {
@@ -57,6 +67,8 @@ export default function ProgramEkle() {
 			programKodu: "",
 			programAdi: "",
 			kullaniciTurleri: [],
+			programTuru: undefined,
+			file: "",
 		},
 	});
 
@@ -66,16 +78,31 @@ export default function ProgramEkle() {
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
+			<div className="w-full mb-10">
+				<h1 className="font-bold text-2xl">Yeni Program Ekle</h1>
+				<h1
+					style={{
+						color: "#64748B",
+					}}
+				>
+					Yeni program eklemek için aşağıdaki formu doldurun. Eklediğiniz programlar
+					<br />
+					herkes tarafından görüntülenebilir ve indirilebilir.
+				</h1>
+			</div>
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full"
+				>
 					<FormField
 						control={form.control}
 						name="programKodu"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Program Kodu</FormLabel>
+								<FormLabel className="text-gray-700">Program Kodu</FormLabel>
 								<FormControl>
-									<Input placeholder="Örn. BB0" {...field} />
+									<Input placeholder="Örn. BB0" {...field} className="w-96" />
 								</FormControl>
 								<FormDescription>Programın Görünecek Kodu</FormDescription>
 								<FormMessage />
@@ -87,9 +114,9 @@ export default function ProgramEkle() {
 						name="programAdi"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Program Adı</FormLabel>
+								<FormLabel className="text-gray-700">Program Adı</FormLabel>
 								<FormControl>
-									<Input placeholder="Örn. Adobe Reader" {...field} />
+									<Input placeholder="Örn. Adobe Reader" {...field} className="w-96" />
 								</FormControl>
 								<FormDescription>Programın Görünecek Adı</FormDescription>
 								<FormMessage />
@@ -102,7 +129,7 @@ export default function ProgramEkle() {
 						render={() => (
 							<FormItem>
 								<div className="mb-4">
-									<FormLabel>Kullanıcı Türleri</FormLabel>
+									<FormLabel className="text-gray-700">Kullanıcı Türleri</FormLabel>
 									<FormDescription>
 										Programın hangi kullanıcılar tarafından kullanılacağını seçin.
 									</FormDescription>
@@ -116,7 +143,7 @@ export default function ProgramEkle() {
 											return (
 												<FormItem
 													key={tur.id}
-													className="flex flex-row items-start space-x-3 space-y-0"
+													className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
 												>
 													<FormControl>
 														<Checkbox
@@ -132,7 +159,9 @@ export default function ProgramEkle() {
 															}}
 														/>
 													</FormControl>
-													<FormLabel className="font-normal">{tur.label}</FormLabel>
+													<FormLabel className="font-normal text-slate-700">
+														{tur.label}
+													</FormLabel>
 												</FormItem>
 											);
 										}}
@@ -147,7 +176,7 @@ export default function ProgramEkle() {
 						name="programTuru"
 						render={({ field }) => (
 							<FormItem className="space-y-3">
-								<FormLabel>Program Türü</FormLabel>
+								<FormLabel className="text-slate-700">Program Türü</FormLabel>
 								<FormControl>
 									<RadioGroup
 										onValueChange={field.onChange}
@@ -158,15 +187,38 @@ export default function ProgramEkle() {
 											<FormControl>
 												<RadioGroupItem value="bb" />
 											</FormControl>
-											<FormLabel className="font-normal">Birim Bazlı</FormLabel>
+											<FormLabel className="font-normal text-slate-700">Birim Bazlı</FormLabel>
 										</FormItem>
 										<FormItem className="flex items-center space-x-3 space-y-0">
 											<FormControl>
 												<RadioGroupItem value="sb" />
 											</FormControl>
-											<FormLabel className="font-normal">Süreç Bazlı</FormLabel>
+											<FormLabel className="font-normal text-slate-700">Süreç Bazlı</FormLabel>
 										</FormItem>
 									</RadioGroup>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="file"
+						render={({ field }) => (
+							<FormItem className="space-y-3">
+								<FormLabel className="text-slate-700">PDF Dosyası</FormLabel>
+								<FormControl>
+									<div className="grid w-full max-w-sm items-center gap-1.5">
+										<Input
+											id="dosya"
+											type="file"
+											accept=".pdf"
+											onChange={(e) => {
+												const file = e.target.files?.[0];
+												field.onChange(file ? file.name : "");
+											}}
+										/>
+									</div>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
