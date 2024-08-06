@@ -1,4 +1,5 @@
 "use client";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@context/AuthContext";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -14,6 +15,7 @@ export default function RootLayout({
 		<AuthProvider>
 			<html lang="en">
 				<body className={inter.className}>{children}</body>
+				<Toaster />
 			</html>
 		</AuthProvider>
 	);
