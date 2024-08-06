@@ -10,6 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@components/ui/radio-group";
+import withAuth from "@hoc/withAuth";
 
 const kullaniciTurListesi = [
 	{
@@ -25,6 +26,16 @@ const kullaniciTurListesi = [
 		label: "Başkan",
 	},
 ] as const;
+
+const demoMudurlukler = [
+	"Beyaz Liste",
+	"Genel Müdürlük",
+	"Bölge Müdürlüğü",
+	"İnsan Kaynakları ve Destek Hizmetleri Müdürlüğü",
+	"Bankacılık ve Muhasebe Müdürlüğü",
+	"Mekansal Planlama Müdürlüğü",
+	"Yapım Uygulamaları Müdürlüğü",
+];
 
 const formSchema = z.object({
 	programKodu: z
@@ -58,9 +69,12 @@ const formSchema = z.object({
 		.refine((value) => value?.endsWith(".pdf"), {
 			message: "Bir PDF dosyası seçmelisiniz.",
 		}),
+	mudurlukler: z.array(z.string()).refine((value) => value.some((item) => item), {
+		message: "En az bir müdürlük seçmelisiniz.",
+	}),
 });
 
-export default function ProgramEkle() {
+function ProgramEkle() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -69,6 +83,7 @@ export default function ProgramEkle() {
 			kullaniciTurleri: [],
 			programTuru: undefined,
 			file: "",
+			mudurlukler: [],
 		},
 	});
 
@@ -224,9 +239,59 @@ export default function ProgramEkle() {
 							</FormItem>
 						)}
 					/>
+					<FormField
+						control={form.control}
+						name="mudurlukler"
+						render={() => (
+							<FormItem>
+								<div className="mb-4">
+									<FormLabel className="text-gray-700">Müdürlükler</FormLabel>
+									<FormDescription>
+										Programın hangi müdürlükler tarafından kullanılacağını seçin.
+									</FormDescription>
+								</div>
+								{demoMudurlukler.map((mudurluk) => (
+									<FormField
+										key={mudurluk}
+										control={form.control}
+										name="mudurlukler"
+										render={({ field }) => {
+											return (
+												<FormItem
+													key={mudurluk}
+													className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
+												>
+													<FormControl>
+														<Checkbox
+															checked={field.value?.includes(mudurluk)}
+															onCheckedChange={(checked) => {
+																return checked
+																	? field.onChange([...field.value, mudurluk])
+																	: field.onChange(
+																			field.value?.filter(
+																				(value) => value !== mudurluk,
+																			),
+																	  );
+															}}
+														/>
+													</FormControl>
+													<FormLabel className="font-normal text-slate-700">
+														{mudurluk}
+													</FormLabel>
+												</FormItem>
+											);
+										}}
+									/>
+								))}
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 					<Button type="submit">Oluştur</Button>
 				</form>
 			</Form>
 		</main>
 	);
 }
+
+export default withAuth(ProgramEkle);
