@@ -18,21 +18,27 @@ import * as React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { convertUserTypesToString } from "@/lib/utils";
 import { Button } from "@components/ui/button";
-import { Checkbox } from "@components/ui/checkbox";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import { Input } from "@components/ui/input";
-import { Data, ProgramType } from "@interfaces/data";
+import { Program, ProgramType } from "@interfaces/program";
 import Link from "next/link";
 
-const data: Data[] = [
+const mockMudurlukListesi: string[] = [
+	"Beyaz Liste",
+	"Genel Müdürlük",
+	"Bölge Müdürlüğü",
+	"İnsan Kaynakları ve Destek Hizmetleri Müdürlüğü",
+	"Bankacılık ve Muhasebe Müdürlüğü",
+	"Mekansal Planlama Müdürlüğü",
+	"Yapım Uygulamaları Müdürlüğü",
+];
+
+const data: Program[] = [
 	{
 		code: 0,
 		programName: "ADOBE READER",
@@ -102,7 +108,7 @@ enum ColumnName {
 	"userTypes" = "Kurulacak Kişiler",
 }
 
-export const columns: ColumnDef<Data>[] = [
+export const columns: ColumnDef<Program>[] = [
 	{
 		accessorKey: "code",
 		header: ({ column }) => {
@@ -170,6 +176,7 @@ export default function ProgramListesi() {
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
+	const [selectedButton, setSelectedButton] = React.useState<number>(0);
 
 	// add one page is 5 rows
 	const table = useReactTable({
@@ -194,7 +201,7 @@ export default function ProgramListesi() {
 	});
 
 	return (
-		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
+		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center h-full">
 			<div className="w-full mb-10">
 				<h1 className="font-bold text-2xl">Program Listesi</h1>
 				<h1
@@ -204,8 +211,24 @@ export default function ProgramListesi() {
 				>
 					Tablo üzerinden programları inceleyebilir, dilediğiniz programın detaylarına
 					<br />
-					program adının üzerine tıklayarak ulaşabilirsiniz.
+					program adının üzerine tıklayarak ulaşabilirsiniz. Bu kısımda bütün beyaz liste programları
+					<br />
+					görüntüleyebilirsiniz.
 				</h1>
+			</div>
+			<div className="mt-6 mb-6 w-full">
+				{mockMudurlukListesi.map((mudurluk) => (
+					<Button
+						key={mudurluk}
+						variant={selectedButton === mockMudurlukListesi.indexOf(mudurluk) ? "default" : "outline"}
+						className="mr-2 mb-2"
+						onClick={() => {
+							setSelectedButton(mockMudurlukListesi.indexOf(mudurluk));
+						}}
+					>
+						{mudurluk}
+					</Button>
+				))}
 			</div>
 			<div className="w-full">
 				<div className="flex items-center justify-between py-4">
