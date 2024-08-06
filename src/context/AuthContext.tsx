@@ -10,6 +10,7 @@ interface AuthContextType {
 	jwtToken: string | null;
 	login: (credentials: UserLoginType) => Promise<void>;
 	logout: () => void;
+	loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,11 +45,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 		api.defaults.headers.Authorization = null;
 	};
 
-	return (
-		<AuthContext.Provider value={{ jwtToken, login, logout }}>
-			{loading ? <div>Loading...</div> : children}
-		</AuthContext.Provider>
-	);
+	return <AuthContext.Provider value={{ jwtToken, login, logout, loading }}>{children}</AuthContext.Provider>;
 };
 
 const useAuth = (): AuthContextType => {
