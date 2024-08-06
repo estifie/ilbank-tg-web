@@ -1,4 +1,4 @@
-export interface Data {
+export interface Program {
 	code: number;
 	programName: string;
 	programType: ProgramType;

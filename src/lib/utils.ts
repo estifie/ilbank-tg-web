@@ -1,4 +1,4 @@
-import { UserType } from "@interfaces/data";
+import { UserType } from "@interfaces/program";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
