@@ -1,17 +1,10 @@
 export interface Program {
-	code: number;
-	programName: string;
-	programType: ProgramType;
-	userTypes: UserType[];
+	code?: string;
+	name: string;
+	type: ProgramType;
+	users: string[];
+	directorateList?: string[];
+	file?: File | null;
 }
 
-export enum ProgramType {
-	"Süreç Bazlı" = 0,
-	"Birim Bazlı" = 1,
-}
-
-export enum UserType {
-	"Personel" = 0,
-	"Müdür" = 1,
-	"Başkan" = 2,
-}
+export type ProgramType = "Süreç" | "Birim";
