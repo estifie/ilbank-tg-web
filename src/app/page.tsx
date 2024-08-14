@@ -6,7 +6,7 @@ const Home: React.FC = () => {
 	const router = useRouter();
 
 	useEffect(() => {
-		router.push("/programlar");
+		router.push("/admin/programlar");
 	}, [router]);
 
 	return (
