@@ -1,9 +1,6 @@
 import { Button } from "@components/ui/button";
-import { Checkbox } from "@components/ui/checkbox";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@components/ui/radio-group";
 import { useAuth } from "@context/AuthContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
@@ -45,6 +42,7 @@ export default function Login() {
 	function onSubmit(values: z.infer<typeof formSchema>) {
 		toast("Giriş yapılıyor", {
 			description: "Lütfen biraz bekleyin...",
+			duration: 800,
 		});
 		login(values);
 	}
