@@ -1,99 +1,97 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@components/ui/button";
 import { Checkbox } from "@components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@components/ui/radio-group";
+import { useDirectorates } from "@context/DirectorateContext";
+import { usePrograms } from "@context/ProgramContext";
 import withAuth from "@hoc/withAuth";
-
-const kullaniciTurListesi = [
-	{
-		id: "personel",
-		label: "Personel",
-	},
-	{
-		id: "müdür",
-		label: "Müdür",
-	},
-	{
-		id: "başkan",
-		label: "Başkan",
-	},
-] as const;
-
-const demoMudurlukler = [
-	"Beyaz Liste",
-	"Genel Müdürlük",
-	"Bölge Müdürlüğü",
-	"İnsan Kaynakları ve Destek Hizmetleri Müdürlüğü",
-	"Bankacılık ve Muhasebe Müdürlüğü",
-	"Mekansal Planlama Müdürlüğü",
-	"Yapım Uygulamaları Müdürlüğü",
-];
-
-const formSchema = z.object({
-	programKodu: z
-		.string()
-		.min(1, {
-			message: "Program kodu boş bırakılamaz.",
-		})
-		.max(255, {
-			message: "Program kodu en fazla 255 karakter olmalıdır.",
-		})
-		.refine((value) => /^SB\d+$/.test(value) || /^BB\d+$/.test(value), {
-			message: "Program kodu SB veya BB ile başlamalıdır.",
-		}),
-	programAdi: z
-		.string()
-		.min(1, {
-			message: "Program adı boş bırakılamaz.",
-		})
-		.max(255, {
-			message: "Program adı en fazla 255 karakter olmalıdır.",
-		}),
-	kullaniciTurleri: z.array(z.string()).refine((value) => value.some((item) => item), {
-		message: "En az bir kullanıcı türü seçmelisiniz.",
-	}),
-	programTuru: z.enum(["bb", "sb"], {
-		required_error: "Program türü seçmelisiniz.",
-	}),
-	file: z
-		.string()
-		.optional()
-		.refine((value) => value?.endsWith(".pdf"), {
-			message: "Bir PDF dosyası seçmelisiniz.",
-		}),
-	mudurlukler: z.array(z.string()).refine((value) => value.some((item) => item), {
-		message: "En az bir müdürlük seçmelisiniz.",
-	}),
-});
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { formSchema, kullaniciTurListesi } from "./formSchema";
 
 function ProgramEkle() {
+	const { addProgram } = usePrograms();
+	const router = useRouter();
+	const { getDirectorates, directorates } = useDirectorates();
+	const [visibleDirectorates, setVisibleDirectorates] = useState<{
+		bm: string[];
+		gm: string[];
+		others: string[];
+	}>({
+		bm: [],
+		gm: [],
+		others: [],
+	});
+
+	useEffect(() => {
+		const bm = directorates.filter((mudurluk) => mudurluk.includes("bm-"));
+		const gm = directorates.filter((mudurluk) => mudurluk.includes("gm-"));
+		const others = directorates.filter((mudurluk) => !mudurluk.includes("-"));
+
+		setVisibleDirectorates({ bm, gm, others });
+	}, [directorates]);
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			programKodu: "",
 			programAdi: "",
 			kullaniciTurleri: [],
-			programTuru: undefined,
-			file: "",
+			programTuru: "Birim",
+			file: null,
 			mudurlukler: [],
 		},
 	});
 
+	useEffect(() => {
+		getDirectorates();
+	}, []);
+
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
+		toast("Program ekleniyor", {
+			description: "Lütfen biraz bekleyin...",
+			duration: 2000,
+		});
+		let userList: string[] =
+			values.kullaniciTurleri.map((item: string) => {
+				switch (item) {
+					case "personel":
+						return "Personel";
+					case "müdür":
+						return "Müdür";
+					case "başkan":
+						return "Başkan";
+					default:
+						return "";
+				}
+			}) || [];
+
+		userList = Array.from(new Set(userList));
+
+		console.log("Program ekleme", values);
+
+		addProgram({
+			name: values.programAdi,
+			type: values.programTuru,
+			users: userList,
+			directorateList: values.mudurlukler,
+			file: values.file,
+		});
 	}
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
 			<div className="w-full mb-10">
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.push("/admin")} />
+
 				<h1 className="font-bold text-2xl">Yeni Program Ekle</h1>
 				<h1
 					style={{
@@ -108,22 +106,11 @@ function ProgramEkle() {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
+					onError={(errors) => {
+						console.log(errors);
+					}}
 					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full"
 				>
-					<FormField
-						control={form.control}
-						name="programKodu"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-gray-700">Program Kodu</FormLabel>
-								<FormControl>
-									<Input placeholder="Örn. BB0" {...field} className="w-96" />
-								</FormControl>
-								<FormDescription>Programın Görünecek Kodu</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
 					<FormField
 						control={form.control}
 						name="programAdi"
@@ -200,13 +187,13 @@ function ProgramEkle() {
 									>
 										<FormItem className="flex items-center space-x-3 space-y-0">
 											<FormControl>
-												<RadioGroupItem value="bb" />
+												<RadioGroupItem value="Birim" />
 											</FormControl>
 											<FormLabel className="font-normal text-slate-700">Birim Bazlı</FormLabel>
 										</FormItem>
 										<FormItem className="flex items-center space-x-3 space-y-0">
 											<FormControl>
-												<RadioGroupItem value="sb" />
+												<RadioGroupItem value="Süreç" />
 											</FormControl>
 											<FormLabel className="font-normal text-slate-700">Süreç Bazlı</FormLabel>
 										</FormItem>
@@ -230,7 +217,7 @@ function ProgramEkle() {
 											accept=".pdf"
 											onChange={(e) => {
 												const file = e.target.files?.[0];
-												field.onChange(file ? file.name : "");
+												field.onChange(file ? file : "");
 											}}
 										/>
 									</div>
@@ -250,7 +237,7 @@ function ProgramEkle() {
 										Programın hangi müdürlükler tarafından kullanılacağını seçin.
 									</FormDescription>
 								</div>
-								{demoMudurlukler.map((mudurluk) => (
+								{visibleDirectorates.others.map((mudurluk) => (
 									<FormField
 										key={mudurluk}
 										control={form.control}
@@ -283,11 +270,99 @@ function ProgramEkle() {
 										}}
 									/>
 								))}
+								<Accordion type="single" collapsible>
+									<AccordionItem value="item-1">
+										<AccordionTrigger>Genel Müdürlük Alt Bölümleri</AccordionTrigger>
+										<AccordionContent>
+											{visibleDirectorates.gm.map((mudurluk) => (
+												<FormField
+													key={mudurluk}
+													control={form.control}
+													name="mudurlukler"
+													render={({ field }) => {
+														return (
+															<FormItem
+																key={mudurluk}
+																className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
+															>
+																<FormControl>
+																	<Checkbox
+																		checked={field.value?.includes(mudurluk)}
+																		onCheckedChange={(checked) => {
+																			return checked
+																				? field.onChange([
+																						...field.value,
+																						mudurluk,
+																				  ])
+																				: field.onChange(
+																						field.value?.filter(
+																							(value) =>
+																								value !== mudurluk,
+																						),
+																				  );
+																		}}
+																	/>
+																</FormControl>
+																<FormLabel className="font-normal text-slate-700">
+																	{mudurluk.replace("gm-", "")}
+																</FormLabel>
+															</FormItem>
+														);
+													}}
+												/>
+											))}
+										</AccordionContent>
+									</AccordionItem>
+								</Accordion>
+								<Accordion type="single" collapsible>
+									<AccordionItem value="item-1">
+										<AccordionTrigger>Bölge Müdürlüğü Alt Bölümleri</AccordionTrigger>
+										<AccordionContent>
+											{visibleDirectorates.bm.map((mudurluk) => (
+												<FormField
+													key={mudurluk}
+													control={form.control}
+													name="mudurlukler"
+													render={({ field }) => {
+														return (
+															<FormItem
+																key={mudurluk}
+																className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
+															>
+																<FormControl>
+																	<Checkbox
+																		checked={field.value?.includes(mudurluk)}
+																		onCheckedChange={(checked) => {
+																			return checked
+																				? field.onChange([
+																						...field.value,
+																						mudurluk,
+																				  ])
+																				: field.onChange(
+																						field.value?.filter(
+																							(value) =>
+																								value !== mudurluk,
+																						),
+																				  );
+																		}}
+																	/>
+																</FormControl>
+																<FormLabel className="font-normal text-slate-700">
+																	{mudurluk.replace("bm-", "")}
+																</FormLabel>
+															</FormItem>
+														);
+													}}
+												/>
+											))}
+										</AccordionContent>
+									</AccordionItem>
+								</Accordion>
 								<FormMessage />
 							</FormItem>
 						)}
 					/>
-					<Button type="submit">Oluştur</Button>
+					<Button type="submit">Program Ekle</Button>
 				</form>
 			</Form>
 		</main>
