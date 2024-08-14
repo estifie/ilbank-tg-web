@@ -1,4 +1,3 @@
-import { UserType } from "@interfaces/program";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -6,10 +5,10 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function convertUserTypesToString(userTypes: UserType[]) {
-	return userTypes.map((userType) => UserType[userType]).join(", ");
+export function displayUserTypes(users: string[]) {
+	return users.join(", ") || "Kullanıcı Yok";
 }
 
-export function convertProgramTypeToString(programType: number) {
-	return programType === 0 ? "Süreç Bazlı" : "Birim Bazlı";
+export function convertProgramTypeToString(type: number) {
+	return type === 0 ? "Süreç Bazlı" : "Birim Bazlı";
 }
