@@ -46,7 +46,7 @@ function AdminPanel() {
 				<Button className="flex-1 h-full" variant={"outline"}>
 					<Link
 						className="flex sm:text-base text-xl font-semibold w-full h-full justify-center items-center"
-						href={"/kullanici-ekle"}
+						href={"/admin/kullanici-ekle"}
 					>
 						Yeni Yönetici Ekle
 					</Link>
