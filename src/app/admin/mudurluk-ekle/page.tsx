@@ -4,31 +4,49 @@ import { Button } from "@components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
+import anaMudurlukKategorileri from "@constants/anaMudurlukKategorileri";
+import { useDirectorates } from "@context/DirectorateContext";
 import withAuth from "@hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+
 const formSchema = z.object({
 	mudurlukAdi: z.string().min(1, {
 		message: "Müdürlük adı boş bırakılamaz.",
 	}),
+	anaKategori: z.enum(["none", "gm", "bm"], {
+		required_error: "Ana kategori seçmelisiniz.",
+	}),
 });
 
 function ProgramEkle() {
+	const { addDirectorate } = useDirectorates();
+	const router = useRouter();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			mudurlukAdi: "",
+			anaKategori: "none",
 		},
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
+		// If values.anaKategori is "none", then we should not add it to the directorate name
+		const anaKategori = values.anaKategori === "none" ? "" : values.anaKategori + "-";
+		addDirectorate(anaKategori + values.mudurlukAdi).then(() => {
+			router.push("/admin");
+		});
 	}
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
 			<div className="w-full mb-10">
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.push("/admin")} />
+
 				<h1 className="font-bold text-2xl">Yeni Müdürlük Ekle</h1>
 				<h1
 					style={{
@@ -57,6 +75,38 @@ function ProgramEkle() {
 								<FormDescription>Programlarda görünecek müdürlük adı</FormDescription>
 
 								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="anaKategori"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="text-gray-700">Ana Kategori</FormLabel>
+								<div className="flex space-x-4">
+									<Label key={"none"} className="flex items-center space-x-2">
+										<Input
+											type="radio"
+											{...field}
+											value={"none"}
+											className="w-4 h-4 checked:bg-slate-700"
+										/>
+										<span>{"Ana Kategori Yok"}</span>
+									</Label>
+
+									{anaMudurlukKategorileri.map((item) => (
+										<Label key={item.id} className="flex items-center space-x-2">
+											<Input
+												type="radio"
+												{...field}
+												value={item.id}
+												className="w-4 h-4 checked:bg-slate-700"
+											/>
+											<span>{item.label}</span>
+										</Label>
+									))}
+								</div>
 							</FormItem>
 						)}
 					/>

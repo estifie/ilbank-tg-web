@@ -4,8 +4,11 @@ import { Button } from "@components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
+import { useAuth } from "@context/AuthContext";
 import withAuth from "@hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -19,6 +22,9 @@ const formSchema = z.object({
 });
 
 function ProgramEkle() {
+	const { addUser } = useAuth();
+	const router = useRouter();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -28,12 +34,17 @@ function ProgramEkle() {
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
+		addUser({
+			username: values.username,
+			password: values.sifre,
+		});
 	}
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
 			<div className="w-full mb-10">
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.push("/admin")} />
+
 				<h1 className="font-bold text-2xl">Yeni Kullanıcı Ekle</h1>
 				<h1
 					style={{
