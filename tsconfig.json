@@ -23,6 +23,7 @@
 			"@config/*": ["./src/config/*"],
 			"@context/*": ["./src/context/*"],
 			"@hoc/*": ["./src/hoc/*"],
+			"@constants/*": ["./src/constants/*"],
 			"@/*": ["./src/*"]
 		}
 	},
