@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -20,7 +23,11 @@ import {
 	DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import { Input } from "@components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@components/ui/table";
+import anaMudurlukKategorileri from "@constants/anaMudurlukKategorileri";
 import { useAuth } from "@context/AuthContext";
+import { useDirectorates } from "@context/DirectorateContext";
+import { usePrograms } from "@context/ProgramContext";
 import withAuth from "@hoc/withAuth";
 import { Program } from "@interfaces/program";
 import {
@@ -34,73 +41,11 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
+import { toast } from "sonner";
 import { ColumnName, columns } from "./dataTableColumns";
-
-const data: Program[] = [
-	{
-		code: 0,
-		programName: "ADOBE READER",
-		programType: 0,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 1,
-		programName: "YBS MOBİL UYGULAMASI",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 2,
-		programName: "LEICAGSI",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 3,
-		programName: "TOPCON - AKTARIM",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 4,
-		programName: "CAMTASİA 2020",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 5,
-		programName: "CAMTASİA 2021",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 6,
-		programName: "LEICAGSI",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 7,
-		programName: "TOPCON - AKTARIM",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 8,
-		programName: "CAMTASİA 2020",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-	{
-		code: 9,
-		programName: "CAMTASİA 2021",
-		programType: 1,
-		userTypes: [0, 1, 2],
-	},
-];
 
 function AdminPrograms() {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -108,6 +53,10 @@ function AdminPrograms() {
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
+	const [data, setData] = React.useState<Program[]>([]);
+	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
+	const { getPrograms, removeProgram, programs } = usePrograms();
+	const [selectedButton, setSelectedButton] = React.useState<number>(0);
 
 	const table = useReactTable({
 		data,
@@ -130,6 +79,15 @@ function AdminPrograms() {
 		onPaginationChange: setPagination,
 	});
 
+	React.useEffect(() => {
+		getDirectorates().then((directorates) => {
+			getPrograms().then((programs) => {
+				console.log("Programlar alındı:", programs);
+				setData(programs.filter((program) => program.directorateList?.includes(directorates[selectedButton])));
+			});
+		});
+	}, []);
+
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
 			<div className="w-full mb-10">
@@ -145,17 +103,53 @@ function AdminPrograms() {
 					menüden sütunları gösterebilir veya gizleyebilirsiniz.
 				</h1>
 			</div>
+			<div className="mt-6 mb-6 w-full">
+				{directorates
+					.filter((mudurluk) => !mudurluk.includes("-"))
+					.map((mudurluk) => (
+						<Button
+							key={mudurluk}
+							variant={selectedButton === directorates.indexOf(mudurluk) ? "default" : "outline"}
+							className="mr-2 mb-2"
+							onClick={() => {
+								setSelectedButton(directorates.indexOf(mudurluk));
+
+								setData(programs.filter((program) => program.directorateList?.includes(mudurluk)));
+							}}
+						>
+							{mudurluk}
+						</Button>
+					))}
+				<Combobox
+					label={"Genel Müdürlükler"}
+					id={"gm"}
+					setData={setData}
+					setSelectedButton={setSelectedButton}
+					programs={programs}
+					buttonId={-1}
+					selectedButton={selectedButton}
+				/>
+				<Combobox
+					label={"Bölge Müdürlükleri"}
+					id={"bm"}
+					setData={setData}
+					setSelectedButton={setSelectedButton}
+					programs={programs}
+					buttonId={-2}
+					selectedButton={selectedButton}
+				/>
+			</div>
 			<div className="w-full">
 				<div className="flex items-center justify-between py-4">
 					<div className="flex flex-row">
 						<Input
 							placeholder="Program adı ara..."
-							value={(table.getColumn("programName")?.getFilterValue() as string) ?? ""}
-							onChange={(event) => table.getColumn("programName")?.setFilterValue(event.target.value)}
+							value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+							onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
 							className="max-w-sm mr-6"
 						/>
 						<Button>
-							<Link href={"/program-ekle"}>Program Ekle</Link>
+							<Link href={"/admin/program-ekle"}>Program Ekle</Link>
 						</Button>
 					</div>
 
@@ -234,6 +228,7 @@ function AdminPrograms() {
 									<Button
 										variant="destructive"
 										disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+										onClick={() => {}}
 									>
 										Seçilenleri Sil
 									</Button>
@@ -248,7 +243,15 @@ function AdminPrograms() {
 									</AlertDialogHeader>
 									<AlertDialogFooter>
 										<AlertDialogCancel>İptal</AlertDialogCancel>
-										<AlertDialogAction>Evet, Eminim</AlertDialogAction>
+										<AlertDialogAction
+											onClick={() => {
+												table.getFilteredSelectedRowModel().rows.forEach((row) => {
+													removeProgram(row.original.code!);
+												});
+											}}
+										>
+											Evet, Eminim
+										</AlertDialogAction>
 									</AlertDialogFooter>
 								</AlertDialogContent>
 							</AlertDialog>
@@ -279,3 +282,97 @@ function AdminPrograms() {
 }
 
 export default withAuth(AdminPrograms);
+
+export function Combobox({
+	label,
+	id,
+	setData,
+	setSelectedButton,
+	programs,
+	buttonId,
+	selectedButton,
+}: {
+	label: string;
+	id: string;
+	buttonId: number;
+	setData: React.Dispatch<React.SetStateAction<Program[]>>;
+	setSelectedButton: React.Dispatch<React.SetStateAction<number>>;
+	programs: Program[];
+	selectedButton: number;
+}) {
+	const [open, setOpen] = React.useState(false);
+	const [value, setValue] = React.useState("");
+	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
+	const [directorateList, setDirectorateList] = React.useState<string[]>([]);
+
+	React.useEffect(() => {
+		getDirectorates();
+	}, []);
+
+	// When selectedButton changes if it is not equal to buttonId, then set value ""
+	React.useEffect(() => {
+		if (selectedButton !== buttonId) {
+			setValue("");
+		}
+	}, [selectedButton]);
+
+	React.useEffect(() => {
+		// replace id- with ""
+		setDirectorateList(
+			directorates
+				.filter((mudurluk) => mudurluk.startsWith(id + "-"))
+				.map((mudurluk) => mudurluk.replace(id + "-", "")),
+		);
+	}, [directorates]);
+
+	React.useEffect(() => {
+		if (value) {
+			setData(programs.filter((program) => program.directorateList?.includes(id + "-" + value)));
+			setSelectedButton(buttonId);
+		}
+	}, [value]);
+
+	return (
+		<Popover open={open} onOpenChange={setOpen}>
+			<PopoverTrigger asChild>
+				<Button
+					variant="outline"
+					role="combobox"
+					aria-expanded={open}
+					className="w-[200px] justify-between mr-2 mb-2"
+				>
+					{value ? directorateList.find((mudurluk) => mudurluk === value) : label}
+					<ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+				</Button>
+			</PopoverTrigger>
+			<PopoverContent className="w-[200px] p-0">
+				<Command>
+					<CommandInput placeholder="Bir müdürlük ara..." />
+					<CommandList>
+						<CommandEmpty>Bir müdürlük bulunamadı.</CommandEmpty>
+						<CommandGroup>
+							{directorateList.map((directorate) => (
+								<CommandItem
+									key={directorate}
+									value={directorate}
+									onSelect={(currentValue) => {
+										setValue(currentValue === value ? "" : currentValue);
+										setOpen(false);
+									}}
+								>
+									<Check
+										className={cn(
+											"mr-2 h-4 w-4",
+											value === directorate ? "opacity-100" : "opacity-0",
+										)}
+									/>
+									{directorate}
+								</CommandItem>
+							))}
+						</CommandGroup>
+					</CommandList>
+				</Command>
+			</PopoverContent>
+		</Popover>
+	);
+}

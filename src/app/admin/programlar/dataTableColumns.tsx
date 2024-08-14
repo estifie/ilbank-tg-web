@@ -1,4 +1,4 @@
-import { convertUserTypesToString } from "@/lib/utils";
+import { displayUserTypes } from "@/lib/utils";
 import { Button } from "@components/ui/button";
 import { Checkbox } from "@components/ui/checkbox";
 import {
@@ -9,19 +9,50 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
-import { Data, ProgramType } from "@interfaces/program";
+import { usePrograms } from "@context/ProgramContext";
+import { Program } from "@interfaces/program";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
 
 export enum ColumnName {
 	"code" = "Program Kodu",
-	"programName" = "Program Adı",
-	"programType" = "Program Türü",
-	"userTypes" = "Kurulacak Kişiler",
+	"name" = "Program Adı",
+	"type" = "Program Türü",
+	"users" = "Kurulacak Kişiler",
 }
 
-export const columns: ColumnDef<Data>[] = [
+const PDF_BASE_URL = "http://localhost:8080";
+
+const ActionsCell = ({ row }: { row: any }) => {
+	const { removeProgram } = usePrograms();
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<Button variant="ghost" className="h-8 w-8 p-0">
+					<span className="sr-only"></span>
+					<MoreHorizontal className="h-4 w-4" />
+				</Button>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent align="end">
+				<DropdownMenuLabel>İşlemler</DropdownMenuLabel>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={() => {
+						console.log(row.original.code);
+						removeProgram(row.original.code);
+					}}
+				>
+					Programı Sil
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+};
+
+export const columns: ColumnDef<Program>[] = [
 	{
 		id: "select",
 		header: ({ table }) => (
@@ -54,7 +85,7 @@ export const columns: ColumnDef<Data>[] = [
 		cell: ({ row }) => <div className="capitalize ml-4">{row.getValue("code")}</div>,
 	},
 	{
-		accessorKey: "programName",
+		accessorKey: "name",
 		header: ({ column }) => {
 			return (
 				<div className="">
@@ -65,10 +96,14 @@ export const columns: ColumnDef<Data>[] = [
 				</div>
 			);
 		},
-		cell: ({ row }) => <div className="capitalize text-left ml-4">{row.getValue("programName")}</div>,
+		cell: ({ row }) => (
+			<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
+				<Link href={`${PDF_BASE_URL}/${row.getValue("code")}.pdf`}>{row.getValue("name")}</Link>
+			</div>
+		),
 	},
 	{
-		accessorKey: "programType",
+		accessorKey: "type",
 		header: ({ column }) => {
 			return (
 				<div className="">
@@ -80,44 +115,23 @@ export const columns: ColumnDef<Data>[] = [
 			);
 		},
 		cell: ({ row }) => {
-			const amount = parseFloat(row.getValue("programType"));
+			const baz = row.getValue("type") + " Bazlı";
 
-			return <div className="ml-4 font-medium">{ProgramType[amount]}</div>;
+			return <div className="ml-4 font-medium">{baz}</div>;
 		},
 	},
 	{
-		accessorKey: "userTypes",
+		accessorKey: "users",
 		header: () => <div className="text-right">Kurulacak Kişiler</div>,
 		cell: ({ row }) => {
-			const userTypes = row.getValue("userTypes") as number[];
+			const users = row.getValue("users") as string[];
 
-			return <div className="text-right">{convertUserTypesToString(userTypes)}</div>;
+			return <div className="text-right">{displayUserTypes(users)}</div>;
 		},
 	},
 	{
 		id: "actions",
 		enableHiding: false,
-		cell: ({ row }) => {
-			const payment = row.original;
-
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only"></span>
-							<MoreHorizontal className="h-4 w-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>İşlemler</DropdownMenuLabel>
-
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.code.toString())}>
-							Programı Sil
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		},
+		cell: ActionsCell,
 	},
 ];
