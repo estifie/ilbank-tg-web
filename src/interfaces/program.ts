@@ -5,6 +5,7 @@ export interface Program {
 	users: string[];
 	directorateList?: string[];
 	file?: File | null;
+	departments?: string[];
 }
 
 export type ProgramType = "Süreç" | "Birim";
