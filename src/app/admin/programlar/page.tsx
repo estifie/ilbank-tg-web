@@ -41,8 +41,9 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { Check, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, ChevronsUpDown } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 import { ColumnName, columns } from "./dataTableColumns";
@@ -56,7 +57,8 @@ function AdminPrograms() {
 	const [data, setData] = React.useState<Program[]>([]);
 	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
 	const { getPrograms, removeProgram, programs } = usePrograms();
-	const [selectedButton, setSelectedButton] = React.useState<number>(0);
+	const [selectedButton, setSelectedButton] = React.useState<number>(-3);
+	const router = useRouter();
 
 	const table = useReactTable({
 		data,
@@ -83,14 +85,28 @@ function AdminPrograms() {
 		getDirectorates().then((directorates) => {
 			getPrograms().then((programs) => {
 				console.log("Programlar alındı:", programs);
-				setData(programs.filter((program) => program.directorateList?.includes(directorates[selectedButton])));
 			});
 		});
 	}, []);
 
+	React.useEffect(() => {
+		// If selectedButton is -3, then show all programs
+		if (selectedButton === -3) {
+			setData(programs);
+		} else {
+			console.log("selectedButton", selectedButton);
+			console.log(directorates[selectedButton]);
+			setData(
+				programs.filter((program) => program.directorateList?.includes(directorates[selectedButton].name!)),
+			);
+		}
+	}, [programs, directorates]);
+
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
 			<div className="w-full mb-10">
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.back()} />
+
 				<h1 className="font-bold text-2xl">Programları Düzenle</h1>
 				<h1
 					style={{
@@ -104,20 +120,33 @@ function AdminPrograms() {
 				</h1>
 			</div>
 			<div className="mt-6 mb-6 w-full">
+				<Button
+					key={"hepsi"}
+					variant={selectedButton === -3 ? "default" : "outline"}
+					className="mr-2 mb-2"
+					onClick={() => {
+						setSelectedButton(-3);
+						setData(programs);
+					}}
+				>
+					Tüm Programlar
+				</Button>
 				{directorates
-					.filter((mudurluk) => !mudurluk.includes("-"))
+					.filter((mudurluk) => !mudurluk.name!.includes("-"))
 					.map((mudurluk) => (
 						<Button
-							key={mudurluk}
+							key={mudurluk.name!}
 							variant={selectedButton === directorates.indexOf(mudurluk) ? "default" : "outline"}
 							className="mr-2 mb-2"
 							onClick={() => {
 								setSelectedButton(directorates.indexOf(mudurluk));
 
-								setData(programs.filter((program) => program.directorateList?.includes(mudurluk)));
+								setData(
+									programs.filter((program) => program.directorateList?.includes(mudurluk.name!)),
+								);
 							}}
 						>
-							{mudurluk}
+							{mudurluk.name!}
 						</Button>
 					))}
 				<Combobox
@@ -246,7 +275,12 @@ function AdminPrograms() {
 										<AlertDialogAction
 											onClick={() => {
 												table.getFilteredSelectedRowModel().rows.forEach((row) => {
-													removeProgram(row.original.code!);
+													removeProgram(row.original.code!).then(() => {
+														getDirectorates().then(() => {
+															getPrograms();
+														});
+														toast.success("Program başarıyla silindi.");
+													});
 												});
 											}}
 										>
@@ -283,7 +317,7 @@ function AdminPrograms() {
 
 export default withAuth(AdminPrograms);
 
-export function Combobox({
+const Combobox = ({
 	label,
 	id,
 	setData,
@@ -299,10 +333,10 @@ export function Combobox({
 	setSelectedButton: React.Dispatch<React.SetStateAction<number>>;
 	programs: Program[];
 	selectedButton: number;
-}) {
+}) => {
 	const [open, setOpen] = React.useState(false);
 	const [value, setValue] = React.useState("");
-	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
+	const { getDirectorates, directorates } = useDirectorates();
 	const [directorateList, setDirectorateList] = React.useState<string[]>([]);
 
 	React.useEffect(() => {
@@ -320,8 +354,8 @@ export function Combobox({
 		// replace id- with ""
 		setDirectorateList(
 			directorates
-				.filter((mudurluk) => mudurluk.startsWith(id + "-"))
-				.map((mudurluk) => mudurluk.replace(id + "-", "")),
+				.filter((mudurluk) => mudurluk.name!.startsWith(id + "-"))
+				.map((mudurluk) => mudurluk.name!.replace(id + "-", "")),
 		);
 	}, [directorates]);
 
@@ -356,6 +390,10 @@ export function Combobox({
 									key={directorate}
 									value={directorate}
 									onSelect={(currentValue) => {
+										if (currentValue === value) {
+											setSelectedButton(-3);
+											setData(programs);
+										}
 										setValue(currentValue === value ? "" : currentValue);
 										setOpen(false);
 									}}
@@ -375,4 +413,4 @@ export function Combobox({
 			</PopoverContent>
 		</Popover>
 	);
-}
+};

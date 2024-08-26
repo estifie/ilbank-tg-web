@@ -6,10 +6,12 @@ import { Checkbox } from "@components/ui/checkbox";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@components/ui/radio-group";
+import { useDepartments } from "@context/DepartmentContext";
 import { useDirectorates } from "@context/DirectorateContext";
 import { usePrograms } from "@context/ProgramContext";
 import withAuth from "@hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Directorate } from "@interfaces/directorate";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,10 +24,11 @@ function ProgramEkle() {
 	const { addProgram } = usePrograms();
 	const router = useRouter();
 	const { getDirectorates, directorates } = useDirectorates();
+	const { getDepartments, departments } = useDepartments();
 	const [visibleDirectorates, setVisibleDirectorates] = useState<{
-		bm: string[];
-		gm: string[];
-		others: string[];
+		bm: Directorate[];
+		gm: Directorate[];
+		others: Directorate[];
 	}>({
 		bm: [],
 		gm: [],
@@ -33,9 +36,9 @@ function ProgramEkle() {
 	});
 
 	useEffect(() => {
-		const bm = directorates.filter((mudurluk) => mudurluk.includes("bm-"));
-		const gm = directorates.filter((mudurluk) => mudurluk.includes("gm-"));
-		const others = directorates.filter((mudurluk) => !mudurluk.includes("-"));
+		const bm = directorates.filter((mudurluk) => mudurluk.name!.includes("bm-"));
+		const gm = directorates.filter((mudurluk) => mudurluk.name!.includes("gm-"));
+		const others = directorates.filter((mudurluk) => !mudurluk.name!.includes("-"));
 
 		setVisibleDirectorates({ bm, gm, others });
 	}, [directorates]);
@@ -48,11 +51,13 @@ function ProgramEkle() {
 			programTuru: "Birim",
 			file: null,
 			mudurlukler: [],
+			birim: [],
 		},
 	});
 
 	useEffect(() => {
 		getDirectorates();
+		getDepartments();
 	}, []);
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
@@ -84,13 +89,14 @@ function ProgramEkle() {
 			users: userList,
 			directorateList: values.mudurlukler,
 			file: values.file,
+			departments: values.birim,
 		});
 	}
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
 			<div className="w-full mb-10">
-				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.push("/admin")} />
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.back()} />
 
 				<h1 className="font-bold text-2xl">Yeni Program Ekle</h1>
 				<h1
@@ -239,31 +245,31 @@ function ProgramEkle() {
 								</div>
 								{visibleDirectorates.others.map((mudurluk) => (
 									<FormField
-										key={mudurluk}
+										key={mudurluk.name!}
 										control={form.control}
 										name="mudurlukler"
 										render={({ field }) => {
 											return (
 												<FormItem
-													key={mudurluk}
+													key={mudurluk.name!}
 													className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
 												>
 													<FormControl>
 														<Checkbox
-															checked={field.value?.includes(mudurluk)}
+															checked={field.value?.includes(mudurluk.name!)}
 															onCheckedChange={(checked) => {
 																return checked
-																	? field.onChange([...field.value, mudurluk])
+																	? field.onChange([...field.value, mudurluk.name!])
 																	: field.onChange(
 																			field.value?.filter(
-																				(value) => value !== mudurluk,
+																				(value) => value !== mudurluk.name!,
 																			),
 																	  );
 															}}
 														/>
 													</FormControl>
 													<FormLabel className="font-normal text-slate-700">
-														{mudurluk}
+														{mudurluk.name!}
 													</FormLabel>
 												</FormItem>
 											);
@@ -276,35 +282,36 @@ function ProgramEkle() {
 										<AccordionContent>
 											{visibleDirectorates.gm.map((mudurluk) => (
 												<FormField
-													key={mudurluk}
+													key={mudurluk.name!}
 													control={form.control}
 													name="mudurlukler"
 													render={({ field }) => {
 														return (
 															<FormItem
-																key={mudurluk}
+																key={mudurluk.name!}
 																className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
 															>
 																<FormControl>
 																	<Checkbox
-																		checked={field.value?.includes(mudurluk)}
+																		checked={field.value?.includes(mudurluk.name!)}
 																		onCheckedChange={(checked) => {
 																			return checked
 																				? field.onChange([
 																						...field.value,
-																						mudurluk,
+																						mudurluk.name!,
 																				  ])
 																				: field.onChange(
 																						field.value?.filter(
 																							(value) =>
-																								value !== mudurluk,
+																								value !==
+																								mudurluk.name!,
 																						),
 																				  );
 																		}}
 																	/>
 																</FormControl>
 																<FormLabel className="font-normal text-slate-700">
-																	{mudurluk.replace("gm-", "")}
+																	{mudurluk.name!.replace("gm-", "")}
 																</FormLabel>
 															</FormItem>
 														);
@@ -320,18 +327,18 @@ function ProgramEkle() {
 										<AccordionContent>
 											{visibleDirectorates.bm.map((mudurluk) => (
 												<FormField
-													key={mudurluk}
+													key={mudurluk.name!}
 													control={form.control}
 													name="mudurlukler"
 													render={({ field }) => {
 														return (
 															<FormItem
-																key={mudurluk}
+																key={mudurluk.name!}
 																className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
 															>
 																<FormControl>
 																	<Checkbox
-																		checked={field.value?.includes(mudurluk)}
+																		checked={field.value?.includes(mudurluk.name!)}
 																		onCheckedChange={(checked) => {
 																			return checked
 																				? field.onChange([
@@ -348,7 +355,7 @@ function ProgramEkle() {
 																	/>
 																</FormControl>
 																<FormLabel className="font-normal text-slate-700">
-																	{mudurluk.replace("bm-", "")}
+																	{mudurluk.name!.replace("bm-", "")}
 																</FormLabel>
 															</FormItem>
 														);
@@ -362,7 +369,69 @@ function ProgramEkle() {
 							</FormItem>
 						)}
 					/>
-					<Button type="submit">Program Ekle</Button>
+					<FormField
+						control={form.control}
+						name="birim"
+						render={() => (
+							<FormItem>
+								<div className="mb-4">
+									<FormLabel className="text-gray-700">Süreç Sahibi Birim(ler)</FormLabel>
+									<FormDescription>
+										Programın hangi birimler tarafından kullanılacağını seçin. Birim bazlı
+										programlar
+										<br />
+										için sadece bir süreç sahibi birim seçebilirsiniz. Süreç bazlı programlar için
+										<br />
+										birden fazla süreç sahibi birim seçebilirsiniz.
+									</FormDescription>
+								</div>
+								{departments.map((birim) => (
+									<FormField
+										key={birim}
+										control={form.control}
+										name="birim"
+										render={({ field }) => {
+											return (
+												<FormItem
+													key={birim}
+													className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
+												>
+													<FormControl>
+														<Checkbox
+															checked={field.value?.includes(birim)}
+															onCheckedChange={(checked) => {
+																// If type is "Birim", set field to [birim]
+																if (form.getValues("programTuru") === "Birim") {
+																	return checked
+																		? field.onChange([birim])
+																		: field.onChange([]);
+																}
+
+																return checked
+																	? field.onChange([...field.value, birim])
+																	: field.onChange(
+																			field.value?.filter(
+																				(value) => value !== birim,
+																			),
+																	  );
+															}}
+														/>
+													</FormControl>
+													<FormLabel className="font-normal text-slate-700">
+														{birim}
+													</FormLabel>
+												</FormItem>
+											);
+										}}
+									/>
+								))}
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<div className="w-full items-center justify-center">
+						<Button type="submit">Program Ekle</Button>
+					</div>
 				</form>
 			</Form>
 		</main>

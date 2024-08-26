@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+const isFile = (value: any) => value instanceof File;
+
 export const formSchema = z.object({
 	programAdi: z
 		.string()
@@ -15,9 +17,17 @@ export const formSchema = z.object({
 	programTuru: z.enum(["Birim", "Süreç"], {
 		required_error: "Program türü seçmelisiniz.",
 	}),
-	file: z.instanceof(File).nullable(), // PDF dosyası
+	file: z
+		.any()
+		.refine(isFile, {
+			message: "Bir dosya seçmelisiniz.",
+		})
+		.nullable(),
 	mudurlukler: z.array(z.string()).refine((value) => value.some((item) => item), {
 		message: "En az bir müdürlük seçmelisiniz.",
+	}),
+	birim: z.array(z.string()).refine((value) => value.some((item) => item), {
+		message: "En az süreç sahibi seçmelisiniz.",
 	}),
 });
 
