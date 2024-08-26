@@ -42,6 +42,7 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 				type: program.type ? "Birim" : "Süreç",
 				directorateList: program.directorateList,
 				users: program.users,
+				departments: program.departments,
 			};
 			await api
 				.post(addProgramEndpoint, data)
@@ -54,8 +55,8 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 						addFile(program.file);
 					}
 				})
-				.then(() => {  
-					router.push("/admin/programlar");
+				.then(() => {
+					router.back();
 				});
 
 			getPrograms();
