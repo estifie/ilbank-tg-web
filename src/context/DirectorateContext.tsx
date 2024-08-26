@@ -1,4 +1,5 @@
 import api from "@config/axios";
+import { Directorate } from "@interfaces/directorate";
 import axios from "axios";
 import { config } from "dotenv";
 import React, { createContext, useContext, useState } from "react";
@@ -8,17 +9,17 @@ config();
 const BASE_URL = "http://localhost:8080/tg/api/";
 
 export interface DirectorateContextType {
-	directorates: string[];
+	directorates: Directorate[];
 	directoratesLoading: boolean;
-	getDirectorates: () => Promise<string[]>;
+	getDirectorates: () => Promise<Directorate[]>;
 	addDirectorate: (directorate: string) => Promise<void>;
-	removeDirectorate: (name: string) => Promise<void>;
+	removeDirectorate: (name: number) => Promise<void>;
 }
 
 const DirectorateContext = createContext<DirectorateContextType | undefined>(undefined);
 
 const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [directorates, setDirectorates] = useState<string[]>([]);
+	const [directorates, setDirectorates] = useState<Directorate[]>([]);
 	const [directoratesLoading, setLoading] = useState<boolean>(false);
 	const addDirectorateEndpoint = BASE_URL + `admin/directorate`;
 	const getDirectoratesEndpoint = BASE_URL + `directorate`;
@@ -26,21 +27,17 @@ const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children
 	const getDirectorates = async () => {
 		setLoading(true);
 		try {
-			console.log("Müdürlükler alınıyor...");
-			console.log(getDirectoratesEndpoint);
-			const response = await axios.get(getDirectoratesEndpoint);
-			console.log("Müdürlükler alındı:", response.data);
+			const response = await axios.get(getDirectoratesEndpoint, {
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Content-Type": "application/json",
+				},
+			});
 
-			/*
-				API RESPONSE FORMAT
-			  	{
-					"id": 1,
-					"name": "Test",
-					"fileList": []
-				}
-			*/
-
-			const names = response.data.map((item: any) => item.name);
+			const names: Directorate[] = response.data.map((item: any) => ({
+				id: item.id,
+				name: item.name,
+			}));
 			setDirectorates(names);
 
 			return names;
@@ -51,6 +48,8 @@ const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children
 			console.error("Müdürlükler sunucudan alınamadı:", error);
 		} finally {
 			setLoading(false);
+
+			return [];
 		}
 	};
 
@@ -70,7 +69,7 @@ const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		}
 	};
 
-	const removeDirectorate = async (id: string) => {
+	const removeDirectorate = async (id: number) => {
 		setLoading(true);
 		try {
 			await api.delete(`${addDirectorateEndpoint}/${id}`, {});
