@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function displayUserTypes(users: string[]) {
+export function displayArray(users: string[]) {
 	return users.join(", ") || "Kullanıcı Yok";
 }
 
