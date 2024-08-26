@@ -5,6 +5,7 @@ import { DirectorateProvider } from "@context/DirectorateContext";
 import { ProgramProvider } from "@context/ProgramContext";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { DepartmentProvider } from "@context/DepartmentContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,10 +18,12 @@ export default function RootLayout({
 		<AuthProvider>
 			<ProgramProvider>
 				<DirectorateProvider>
-					<html lang="en">
-						<body className={inter.className}>{children}</body>
-						<Toaster />
-					</html>
+					<DepartmentProvider>
+						<html lang="en">
+							<body className={inter.className}>{children}</body>
+							<Toaster />
+						</html>
+					</DepartmentProvider>
 				</DirectorateProvider>
 			</ProgramProvider>
 		</AuthProvider>
