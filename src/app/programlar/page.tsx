@@ -16,12 +16,12 @@ import {
 	getSortedRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, Check, ChevronDown, ChevronRightIcon, ChevronsUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, Check, ChevronDown, ChevronsUpDown, MoreHorizontal } from "lucide-react";
 import * as React from "react";
 import { useEffect } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { displayUserTypes } from "@/lib/utils";
+import { displayArray } from "@/lib/utils";
 import { Button } from "@components/ui/button";
 import {
 	DropdownMenu,
@@ -43,9 +43,10 @@ enum ColumnName {
 	"name" = "Program Adı",
 	"type" = "Program Türü",
 	"users" = "Kurulacak Kişiler",
+	"departments" = "Süreç Sahipleri",
 }
 
-export const columns: ColumnDef<Program>[] = [
+const columns: ColumnDef<Program>[] = [
 	{
 		accessorKey: "code",
 		header: ({ column }) => {
@@ -95,12 +96,21 @@ export const columns: ColumnDef<Program>[] = [
 		},
 	},
 	{
+		accessorKey: "departments",
+		header: () => <div className="text-right">Süreç Sahipleri</div>,
+		cell: ({ row }) => {
+			const birimler = row.getValue("departments") as string[];
+
+			return <div className="text-right">{displayArray(birimler)}</div>;
+		},
+	},
+	{
 		accessorKey: "users",
 		header: () => <div className="text-right">Kurulacak Kişiler</div>,
 		cell: ({ row }) => {
 			const users = row.getValue("users") as string[];
 
-			return <div className="text-right">{displayUserTypes(users)}</div>;
+			return <div className="text-right">{displayArray(users)}</div>;
 		},
 	},
 ];
@@ -111,7 +121,7 @@ export default function ProgramListesi() {
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
-	const [selectedButton, setSelectedButton] = React.useState<number>(0);
+	const [selectedButton, setSelectedButton] = React.useState<number>(-3);
 	const [data, setData] = React.useState<Program[]>([]);
 	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
 	const { getPrograms, programs } = usePrograms();
@@ -140,8 +150,16 @@ export default function ProgramListesi() {
 	useEffect(() => {
 		getDirectorates().then((directorates) => {
 			getPrograms().then((programs) => {
-				console.log("Programlar alındı:", programs);
-				setData(programs.filter((program) => program.directorateList?.includes(directorates[selectedButton])));
+				// If selectedButton > 0, then filter programs by directorate
+				if (selectedButton > -1) {
+					setData(
+						programs.filter((program) =>
+							program.directorateList?.includes(directorates[selectedButton].name!),
+						),
+					);
+				} else {
+					setData(programs);
+				}
 			});
 		});
 	}, []);
@@ -163,20 +181,33 @@ export default function ProgramListesi() {
 				</h1>
 			</div>
 			<div className="mt-6 mb-6 w-full">
+				<Button
+					key={"hepsi"}
+					variant={selectedButton === -3 ? "default" : "outline"}
+					className="mr-2 mb-2"
+					onClick={() => {
+						setData(programs);
+						setSelectedButton(-3);
+					}}
+				>
+					Tüm Programlar
+				</Button>
 				{directorates
-					.filter((mudurluk) => !mudurluk.includes("-"))
+					.filter((mudurluk) => !mudurluk.name!.includes("-"))
 					.map((mudurluk) => (
 						<Button
-							key={mudurluk}
+							key={mudurluk.name}
 							variant={selectedButton === directorates.indexOf(mudurluk) ? "default" : "outline"}
 							className="mr-2 mb-2"
 							onClick={() => {
 								setSelectedButton(directorates.indexOf(mudurluk));
 
-								setData(programs.filter((program) => program.directorateList?.includes(mudurluk)));
+								setData(
+									programs.filter((program) => program.directorateList?.includes(mudurluk.name!)),
+								);
 							}}
 						>
-							{mudurluk}
+							{mudurluk.name!}
 						</Button>
 					))}
 				<Combobox
@@ -296,7 +327,7 @@ export default function ProgramListesi() {
 	);
 }
 
-export function Combobox({
+function Combobox({
 	label,
 	id,
 	setData,
@@ -333,8 +364,8 @@ export function Combobox({
 		// replace id- with ""
 		setDirectorateList(
 			directorates
-				.filter((mudurluk) => mudurluk.startsWith(id + "-"))
-				.map((mudurluk) => mudurluk.replace(id + "-", "")),
+				.filter((mudurluk) => mudurluk.name!.startsWith(id + "-"))
+				.map((mudurluk) => mudurluk.name!.replace(id + "-", "")),
 		);
 	}, [directorates]);
 
@@ -369,6 +400,10 @@ export function Combobox({
 									key={directorate}
 									value={directorate}
 									onSelect={(currentValue) => {
+										if (currentValue === value) {
+											setSelectedButton(-3);
+											setData(programs);
+										}
 										setValue(currentValue === value ? "" : currentValue);
 										setOpen(false);
 									}}
