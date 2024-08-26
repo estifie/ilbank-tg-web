@@ -38,14 +38,14 @@ function ProgramEkle() {
 		// If values.anaKategori is "none", then we should not add it to the directorate name
 		const anaKategori = values.anaKategori === "none" ? "" : values.anaKategori + "-";
 		addDirectorate(anaKategori + values.mudurlukAdi).then(() => {
-			router.push("/admin");
+			router.back();
 		});
 	}
 
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
 			<div className="w-full mb-10">
-				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.push("/admin")} />
+				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.back()} />
 
 				<h1 className="font-bold text-2xl">Yeni Müdürlük Ekle</h1>
 				<h1
