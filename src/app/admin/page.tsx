@@ -3,9 +3,12 @@
 import { Button } from "@components/ui/button";
 import withAuth from "@hoc/withAuth";
 import Link from "next/link";
+import { redirect, useRouter } from "next/navigation";
 import * as React from "react";
 
 function AdminPanel() {
+	const router = useRouter();
+
 	return (
 		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
 			<div className="w-full mb-10 items-center justify-center">
@@ -22,25 +25,25 @@ function AdminPanel() {
 				<Button className="flex-1 h-full" variant={"outline"}>
 					<Link
 						className="flex sm:text-base text-xl font-semibold w-full h-full justify-center items-center"
-						href={"/admin/program-ekle"}
-					>
-						Program Ekle
-					</Link>
-				</Button>
-				<Button className="flex-1 h-full" variant={"outline"}>
-					<Link
-						className="flex sm:text-base text-xl font-semibold w-full h-full justify-center items-center"
 						href={"/admin/programlar"}
 					>
-						Program Listesi
+						Program İşlemleri
 					</Link>
 				</Button>
 				<Button className="flex-1 h-full" variant={"outline"}>
 					<Link
 						className="flex sm:text-base text-xl font-semibold w-full h-full justify-center items-center"
-						href={"/admin/mudurluk-ekle"}
+						href={"/admin/mudurluk"}
 					>
-						Müdürlük Ekle
+						Müdürlük İşlemleri
+					</Link>
+				</Button>
+				<Button className="flex-1 h-full" variant={"outline"}>
+					<Link
+						className="flex sm:text-base text-xl font-semibold w-full h-full justify-center items-center"
+						href={"/admin/birim"}
+					>
+						Birim İşlemleri
 					</Link>
 				</Button>
 				<Button className="flex-1 h-full" variant={"outline"}>
