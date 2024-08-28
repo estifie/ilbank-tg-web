@@ -33,10 +33,12 @@ import { Input } from "@components/ui/input";
 import { useDirectorates } from "@context/DirectorateContext";
 import { usePrograms } from "@context/ProgramContext";
 import { Program, ProgramType } from "@interfaces/program";
+import { config } from "dotenv";
 import Link from "next/link";
 import { toast } from "sonner";
+config();
 
-const PDF_BASE_URL = "http://localhost:8080";
+const PDF_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080";
 
 enum ColumnName {
 	"code" = "Program Kodu",
@@ -45,6 +47,25 @@ enum ColumnName {
 	"users" = "Kurulacak Kişiler",
 	"departments" = "Süreç Sahipleri",
 }
+
+const GetProgramCell = ({ row }: { row: any }) => {
+	const { getProgramExtension } = usePrograms();
+
+	const [extension, setExtension] = React.useState<string>("");
+
+	React.useEffect(() => {
+		getProgramExtension(row.original.code).then((data) => {
+			console.log(data);
+			setExtension(data);
+		});
+	}, []);
+
+	return (
+		<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
+			<Link href={`${PDF_BASE_URL}/${row.original.code}.${extension}`}>{row.original.name}</Link>
+		</div>
+	);
+};
 
 const columns: ColumnDef<Program>[] = [
 	{
@@ -71,11 +92,9 @@ const columns: ColumnDef<Program>[] = [
 				</div>
 			);
 		},
-		cell: ({ row }) => (
-			<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
-				<Link href={`${PDF_BASE_URL}/${row.getValue("code")}.pdf`}>{row.getValue("name")}</Link>
-			</div>
-		),
+		cell: ({ row }) => {
+			return <GetProgramCell row={row} />;
+		},
 	},
 	{
 		accessorKey: "type",

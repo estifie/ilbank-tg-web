@@ -6,7 +6,7 @@ import React, { createContext, useContext, useState } from "react";
 import { toast } from "sonner";
 config();
 
-const BASE_URL = "http://localhost:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
 
 export interface DirectorateContextType {
 	directorates: Directorate[];

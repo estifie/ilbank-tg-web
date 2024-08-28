@@ -114,11 +114,6 @@ function ProgramEkle() {
 					<Button type="submit" className="w-64">
 						Müdürlük Ekle
 					</Button>
-					<Label className="text-gray-700">
-						Müdürlükler daha sonradan düzenlenemez. Bu sebeple
-						<br />
-						ekleme işlemini dikkatli yapınız.
-					</Label>
 				</form>
 			</Form>
 		</main>

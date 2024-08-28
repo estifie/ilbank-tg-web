@@ -56,7 +56,7 @@ function AdminPrograms() {
 	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
 	const [data, setData] = React.useState<Program[]>([]);
 	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
-	const { getPrograms, removeProgram, programs } = usePrograms();
+	const { getPrograms, removeProgram, programs, getProgramExtension } = usePrograms();
 	const [selectedButton, setSelectedButton] = React.useState<number>(-3);
 	const router = useRouter();
 

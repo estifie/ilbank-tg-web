@@ -13,10 +13,14 @@ import { useDirectorates } from "@context/DirectorateContext";
 import { usePrograms } from "@context/ProgramContext";
 import { Program } from "@interfaces/program";
 import { ColumnDef } from "@tanstack/react-table";
+import { config } from "dotenv";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 import { toast } from "sonner";
+config();
+
+const PDF_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080";
 
 export enum ColumnName {
 	"code" = "Program Kodu",
@@ -26,10 +30,8 @@ export enum ColumnName {
 	"departments" = "Süreç Sahipleri",
 }
 
-const PDF_BASE_URL = "http://localhost:8080";
-
 const ActionsCell = ({ row }: { row: any }) => {
-	const { removeProgram, getPrograms } = usePrograms();
+	const { removeProgram, getPrograms, getProgramExtension } = usePrograms();
 	const { getDirectorates } = useDirectorates();
 
 	return (
@@ -58,6 +60,25 @@ const ActionsCell = ({ row }: { row: any }) => {
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
+	);
+};
+
+const GetProgramCell = ({ row }: { row: any }) => {
+	const { getProgramExtension } = usePrograms();
+
+	const [extension, setExtension] = React.useState<string>("");
+
+	React.useEffect(() => {
+		getProgramExtension(row.original.code).then((data) => {
+			console.log(data);
+			setExtension(data);
+		});
+	}, []);
+
+	return (
+		<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
+			<Link href={`${PDF_BASE_URL}/${row.original.code}.${extension}`}>{row.original.name}</Link>
+		</div>
 	);
 };
 
@@ -105,11 +126,9 @@ export const columns: ColumnDef<Program>[] = [
 				</div>
 			);
 		},
-		cell: ({ row }) => (
-			<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
-				<Link href={`${PDF_BASE_URL}/${row.getValue("code")}.pdf`}>{row.getValue("name")}</Link>
-			</div>
-		),
+		cell: ({ row }) => {
+			return <GetProgramCell row={row} />;
+		},
 	},
 	{
 		accessorKey: "type",

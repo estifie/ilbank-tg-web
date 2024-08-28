@@ -1,24 +1,25 @@
 import api from "@config/axios";
+import { Department } from "@interfaces/department";
 import axios from "axios";
 import { config } from "dotenv";
 import React, { createContext, useContext, useState } from "react";
 import { toast } from "sonner";
 config();
 
-const BASE_URL = "http://localhost:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api";
 
 export interface DepartmentContextType {
-	departments: string[];
+	departments: Department[];
 	departmentsLoading: boolean;
-	getDepartments: () => Promise<string[]>;
+	getDepartments: () => Promise<Department[]>;
 	addDepartment: (department: string) => Promise<void>;
-	removeDepartment: (name: string) => Promise<void>;
+	removeDepartment: (id: number) => Promise<void>;
 }
 
 const DepartmentContext = createContext<DepartmentContextType | undefined>(undefined);
 
 const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-	const [departments, setDepartments] = useState<string[]>([]);
+	const [departments, setDepartments] = useState<Department[]>([]);
 	const [departmentsLoading, setLoading] = useState<boolean>(false);
 	const addDepartmentEndpoint = BASE_URL + `admin/department`;
 	const getDepartmentsEndpoint = BASE_URL + `department`;
@@ -31,7 +32,7 @@ const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 			const response = await axios.get(getDepartmentsEndpoint);
 			console.log("Departmanlar alındı:", response.data);
 
-			const names = response.data.map((item: any) => item.name);
+			const names = response.data;
 			setDepartments(names);
 
 			return names;
@@ -61,7 +62,7 @@ const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 		}
 	};
 
-	const removeDepartment = async (id: string) => {
+	const removeDepartment = async (id: number) => {
 		setLoading(true);
 		try {
 			await api.delete(`${addDepartmentEndpoint}/${id}`, {});

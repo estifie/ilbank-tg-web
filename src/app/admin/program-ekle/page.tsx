@@ -220,7 +220,6 @@ function ProgramEkle() {
 										<Input
 											id="dosya"
 											type="file"
-											accept=".pdf"
 											onChange={(e) => {
 												const file = e.target.files?.[0];
 												field.onChange(file ? file : "");
@@ -280,6 +279,54 @@ function ProgramEkle() {
 									<AccordionItem value="item-1">
 										<AccordionTrigger>Genel Müdürlük Alt Bölümleri</AccordionTrigger>
 										<AccordionContent>
+											<FormField
+												key={"all-2"}
+												control={form.control}
+												name="mudurlukler"
+												render={({ field }) => {
+													return (
+														<FormItem
+															key={"all-2"}
+															className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
+															style={{
+																display:
+																	visibleDirectorates.gm.length === 0 ? "none" : "",
+															}}
+														>
+															<FormControl>
+																<Checkbox
+																	checked={
+																		// Get length of values that has -gm
+																		field.value?.reduce(
+																			(acc, value) =>
+																				value.includes("gm-") ? acc + 1 : acc,
+																			0,
+																		) === visibleDirectorates.gm.length
+																	}
+																	onCheckedChange={(checked) => {
+																		return checked
+																			? field.onChange([
+																					...field.value,
+																					...visibleDirectorates.gm.map(
+																						(mudurluk) => mudurluk.name!,
+																					),
+																			  ])
+																			: field.onChange(
+																					field.value?.filter(
+																						(value) =>
+																							!value.includes("gm-"),
+																					),
+																			  );
+																	}}
+																/>
+															</FormControl>
+															<FormLabel className="font-normal text-slate-700">
+																{"Tüm Genel Müdürlükler"}
+															</FormLabel>
+														</FormItem>
+													);
+												}}
+											/>
 											{visibleDirectorates.gm.map((mudurluk) => (
 												<FormField
 													key={mudurluk.name!}
@@ -325,6 +372,54 @@ function ProgramEkle() {
 									<AccordionItem value="item-1">
 										<AccordionTrigger>Bölge Müdürlüğü Alt Bölümleri</AccordionTrigger>
 										<AccordionContent>
+											<FormField
+												key={"all"}
+												control={form.control}
+												name="mudurlukler"
+												render={({ field }) => {
+													return (
+														<FormItem
+															key={"all"}
+															className="flex flex-row items-start space-x-3 space-y-0 text-slate-700 mb-2"
+															style={{
+																display:
+																	visibleDirectorates.bm.length === 0 ? "none" : "",
+															}}
+														>
+															<FormControl>
+																<Checkbox
+																	checked={
+																		field.value?.reduce(
+																			(acc, value) =>
+																				value.includes("bm-") ? acc + 1 : acc,
+																			0,
+																		) === visibleDirectorates.bm.length
+																	}
+																	onCheckedChange={(checked) => {
+																		return checked
+																			? field.onChange([
+																					...field.value,
+																					...visibleDirectorates.bm.map(
+																						(mudurluk) => mudurluk.name!,
+																					),
+																			  ])
+																			: // Remove items that contains bm-
+																			  field.onChange(
+																					field.value?.filter(
+																						(value) =>
+																							!value.includes("bm-"),
+																					),
+																			  );
+																	}}
+																/>
+															</FormControl>
+															<FormLabel className="font-normal text-slate-700">
+																{"Tüm Bölge Müdürlükleri"}
+															</FormLabel>
+														</FormItem>
+													);
+												}}
+											/>
 											{visibleDirectorates.bm.map((mudurluk) => (
 												<FormField
 													key={mudurluk.name!}
@@ -343,12 +438,12 @@ function ProgramEkle() {
 																			return checked
 																				? field.onChange([
 																						...field.value,
-																						mudurluk,
+																						mudurluk.name,
 																				  ])
 																				: field.onChange(
 																						field.value?.filter(
 																							(value) =>
-																								value !== mudurluk,
+																								value !== mudurluk.name,
 																						),
 																				  );
 																		}}
@@ -385,40 +480,76 @@ function ProgramEkle() {
 										birden fazla süreç sahibi birim seçebilirsiniz.
 									</FormDescription>
 								</div>
+								<FormField
+									key={"all"}
+									control={form.control}
+									name="birim"
+									render={({ field }) => {
+										return (
+											<FormItem
+												style={{
+													display: form.getValues("programTuru") === "Birim" ? "none" : "",
+												}}
+												key={"all"}
+												className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
+											>
+												<FormControl>
+													<Checkbox
+														/* if it has all other birimler, check it */
+														checked={field.value?.length === departments.length}
+														onCheckedChange={(checked) => {
+															// If type is "Birim", set field to [birim]
+															if (form.getValues("programTuru") !== "Birim") {
+																return checked
+																	? field.onChange(
+																			departments.map((birim) => birim.name),
+																	  )
+																	: field.onChange([]);
+															}
+														}}
+													/>
+												</FormControl>
+												<FormLabel className="font-normal text-slate-700">
+													{"Tüm Birimler"}
+												</FormLabel>
+											</FormItem>
+										);
+									}}
+								/>
 								{departments.map((birim) => (
 									<FormField
-										key={birim}
+										key={birim.name}
 										control={form.control}
 										name="birim"
 										render={({ field }) => {
 											return (
 												<FormItem
-													key={birim}
+													key={birim.name}
 													className="flex flex-row items-start space-x-3 space-y-0 text-slate-700"
 												>
 													<FormControl>
 														<Checkbox
-															checked={field.value?.includes(birim)}
+															checked={field.value?.includes(birim.name)}
 															onCheckedChange={(checked) => {
 																// If type is "Birim", set field to [birim]
 																if (form.getValues("programTuru") === "Birim") {
 																	return checked
-																		? field.onChange([birim])
+																		? field.onChange([birim.name])
 																		: field.onChange([]);
 																}
 
 																return checked
-																	? field.onChange([...field.value, birim])
+																	? field.onChange([...field.value, birim.name])
 																	: field.onChange(
 																			field.value?.filter(
-																				(value) => value !== birim,
+																				(value) => value !== birim.name,
 																			),
 																	  );
 															}}
 														/>
 													</FormControl>
 													<FormLabel className="font-normal text-slate-700">
-														{birim}
+														{birim.name}
 													</FormLabel>
 												</FormItem>
 											);

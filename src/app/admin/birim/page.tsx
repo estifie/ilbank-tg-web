@@ -88,7 +88,8 @@ function AdminDepartments() {
 
 		for (let i = 0; i < departments.length; i++) {
 			departmentList.push({
-				name: departments[i],
+				id: departments[i].id,
+				name: departments[i].name!,
 			});
 		}
 
@@ -220,7 +221,7 @@ function AdminDepartments() {
 										<AlertDialogAction
 											onClick={() => {
 												table.getFilteredSelectedRowModel().rows.forEach((row) => {
-													removeDepartment(row.original.name).then(() => {
+													removeDepartment(row.original.id).then(() => {
 														getDepartments();
 														toast.success("Birim başarıyla silindi.");
 													});

@@ -1,14 +1,17 @@
 import api from "@config/axios";
 import { Program } from "@interfaces/program";
 import axios, { AxiosResponse } from "axios";
+import { config } from "dotenv";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState } from "react";
+config();
 
-const BASE_URL = "http://localhost:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
 
 export interface ProgramContextType {
 	programs: Program[];
 	getPrograms: () => Promise<Program[]>;
+	getProgramExtension: (code: string) => Promise<string>;
 	addProgram: (program: Program) => Promise<void>;
 	removeProgram: (id: string) => Promise<void>;
 }
@@ -35,11 +38,20 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 		}
 	};
 
+	const getProgramExtension = async (code: string) => {
+		try {
+			const response = await axios.get(`${getProgramsEndpoint}/extension/${code}`);
+			return response.data;
+		} catch (error) {
+			console.error("Program uzantısı alınamadı:", error);
+		}
+	};
+
 	const addProgram = async (program: Program) => {
 		try {
 			const data = {
 				name: program.name,
-				type: program.type ? "Birim" : "Süreç",
+				type: program.type,
 				directorateList: program.directorateList,
 				users: program.users,
 				departments: program.departments,
@@ -48,7 +60,8 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 				.post(addProgramEndpoint, data)
 				.then((response: AxiosResponse<any>) => {
 					if (program.file) {
-						program.file = new File([program.file], response.data + ".pdf", {
+						const extension = program.file.name.split(".").pop();
+						program.file = new File([program.file], response.data + "." + extension, {
 							type: program.file.type,
 						});
 
@@ -97,7 +110,7 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 	};
 
 	return (
-		<ProgramContext.Provider value={{ programs, getPrograms, addProgram, removeProgram }}>
+		<ProgramContext.Provider value={{ programs, getPrograms, addProgram, removeProgram, getProgramExtension }}>
 			{children}
 		</ProgramContext.Provider>
 	);

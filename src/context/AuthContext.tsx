@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 config();
 
-const BASE_URL = "http://localhost:8080/tg/api";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
 
 interface UserLoginType {
 	username: string;
@@ -22,7 +22,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [jwtToken, setJwtToken] = useState<string | null>(Cookies.get("jwtToken") || null);
 	const [loading, setLoading] = useState<boolean>(false);
