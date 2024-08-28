@@ -20,31 +20,31 @@ To install the project, you will need to have the following tools installed on y
 -   [Node.js](https://nodejs.org/)
 -   [npm](https://www.npmjs.com/)
 
-First, clone the repository to your local system:
+1. First, clone the repository to your local system:
 
 ```bash
 git clone https://github.com/axelnt/ilbank-tg-web.git
 ```
 
-Then, navigate to the project directory:
+2. Then, navigate to the project directory:
 
 ```bash
 cd ilbank-tg-web
 ```
 
-Install the dependencies:
+3. Install the dependencies:
 
 ```bash
 npm install
 ```
 
-Copy the `.env.example` file to `.env`:
+4. Copy the `.env.example` file to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Update the `NEXT_PUBLIC_API_URL` in the `.env` file to point to the API server:
+5. Update the `NEXT_PUBLIC_API_URL` in the `.env` file to point to the API server:
 
 ```bash
 NEXT_PUBLIC_API_URL=https://IP_OF_THE_SERVER/tg/api
@@ -53,7 +53,7 @@ NEXT_PUBLIC_API_URL=https://IP_OF_THE_SERVER/tg/api
     You can get the API server from the [ILBANK Technical Support Guideline API](
         https://github.com/axelnt/ilbank-tg-api.git) repository.
 
-Then, you will be able to start the development server with the following command:
+6.1. Then, you will be able to start the development server with the following command:
 
 ```bash
 npm run dev
@@ -61,13 +61,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-To build the project for production, you can run the following command:
+Or, you can build the project for production and start the production server.
+
+6.2. To build the project for production, run the following command:
 
 ```bash
 npm run build
 ```
 
-After building the project, you can start the production server with the following command:
+6.2.1. After building the project, you can start the production server with the following command:
 
 ```bash
 npm run start
