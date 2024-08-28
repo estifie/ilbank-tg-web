@@ -73,7 +73,7 @@ const GetProgramCell = ({ row }: { row: any }) => {
 			console.log(data);
 			setExtension(data);
 		});
-	}, []);
+	}, [getProgramExtension, row]);
 
 	return (
 		<div className="capitalize text-left ml-4 underline underline-offset-4 font-medium">
