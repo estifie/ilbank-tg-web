@@ -5,7 +5,7 @@ const nextConfig = {
 			{
 				source: "/",
 				destination: "/programlar",
-				permanent: true,
+				permanent: false,
 			},
 		];
 	},
