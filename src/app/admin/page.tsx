@@ -2,6 +2,7 @@
 
 import { Button } from "@components/ui/button";
 import withAuth from "@hoc/withAuth";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect, useRouter } from "next/navigation";
 import * as React from "react";
@@ -10,7 +11,27 @@ function AdminPanel() {
 	const router = useRouter();
 
 	return (
-		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
+		<main className="min-h-screen flex flex-col items-center p-4 md:p-12   md:pt-12 flex-1 justify-center">
+			<div className=" w-full flex flex-col justify-center items-center">
+				<Image
+					src="/wide-logo.png"
+					alt="Logo"
+					width={369 / 1.2}
+					height={83 / 1.2}
+					className="mb-8"
+					style={{
+						userSelect: "none",
+						pointerEvents: "none",
+					}}
+					draggable={false}
+				/>
+				<h2 className="text-md font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİLİŞİM AĞLARI VE ALTYAPI SİSTEMLERİ MÜDÜRLÜĞÜ
+				</h2>
+				<h2 className="text-xl font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİRİM VE SÜREÇ BAZLI PROGRAMLAR
+				</h2>
+			</div>
 			<div className="w-full mb-10 items-center justify-center">
 				<h1 className="font-bold text-2xl">Yönetim Paneli</h1>
 				<h1

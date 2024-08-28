@@ -6,7 +6,7 @@ import React, { createContext, useContext, useState } from "react";
 import { toast } from "sonner";
 config();
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api";
 
 export interface DirectorateContextType {
 	directorates: Directorate[];
@@ -21,8 +21,8 @@ const DirectorateContext = createContext<DirectorateContextType | undefined>(und
 const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [directorates, setDirectorates] = useState<Directorate[]>([]);
 	const [directoratesLoading, setLoading] = useState<boolean>(false);
-	const addDirectorateEndpoint = BASE_URL + `admin/directorate`;
-	const getDirectoratesEndpoint = BASE_URL + `directorate`;
+	const addDirectorateEndpoint = BASE_URL + `/admin/directorate`;
+	const getDirectoratesEndpoint = BASE_URL + `/directorate`;
 
 	const getDirectorates = async () => {
 		setLoading(true);
@@ -57,7 +57,7 @@ const DirectorateProvider: React.FC<{ children: React.ReactNode }> = ({ children
 		setLoading(true);
 		try {
 			const data = {
-				name: name,
+				name: name.trim(),
 			};
 			await api.post(addDirectorateEndpoint, data);
 			getDirectorates();

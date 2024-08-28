@@ -21,8 +21,8 @@ const DepartmentContext = createContext<DepartmentContextType | undefined>(undef
 const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [departments, setDepartments] = useState<Department[]>([]);
 	const [departmentsLoading, setLoading] = useState<boolean>(false);
-	const addDepartmentEndpoint = BASE_URL + `admin/department`;
-	const getDepartmentsEndpoint = BASE_URL + `department`;
+	const addDepartmentEndpoint = BASE_URL + `/admin/department`;
+	const getDepartmentsEndpoint = BASE_URL + `/department`;
 
 	const getDepartments = async () => {
 		setLoading(true);
@@ -50,7 +50,7 @@ const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 		setLoading(true);
 		try {
 			const data = {
-				name: name,
+				name: name.trim(),
 			};
 			await api.post(addDepartmentEndpoint, data);
 			getDepartments();

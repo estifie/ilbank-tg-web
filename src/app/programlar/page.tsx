@@ -17,6 +17,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, Check, ChevronDown, ChevronsUpDown, MoreHorizontal } from "lucide-react";
+import Image from "next/image";
 import * as React from "react";
 import { useEffect } from "react";
 
@@ -38,7 +39,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 config();
 
-const PDF_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080";
+const PDF_BASE_URL = process.env.NEXT_PUBLIC_FILE_URL || "http://172.16.0.195:8080";
 
 enum ColumnName {
 	"code" = "Program Kodu",
@@ -139,7 +140,7 @@ export default function ProgramListesi() {
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = React.useState({});
-	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
+	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 20 });
 	const [selectedButton, setSelectedButton] = React.useState<number>(-3);
 	const [data, setData] = React.useState<Program[]>([]);
 	const { getDirectorates, directorates, directoratesLoading } = useDirectorates();
@@ -184,7 +185,27 @@ export default function ProgramListesi() {
 	}, []);
 
 	return (
-		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center h-full">
+		<main className="min-h-screen flex flex-col p-4 md:p-12 flex-1">
+			<div className=" w-full flex flex-col justify-center items-center">
+				<Image
+					src="/wide-logo.png"
+					alt="Logo"
+					width={369 / 1.2}
+					height={83 / 1.2}
+					className="mb-8"
+					style={{
+						userSelect: "none",
+						pointerEvents: "none",
+					}}
+					draggable={false}
+				/>
+				<h2 className="text-md font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİLİŞİM AĞLARI VE ALTYAPI SİSTEMLERİ MÜDÜRLÜĞÜ
+				</h2>
+				<h2 className="text-xl font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİRİM VE SÜREÇ BAZLI PROGRAMLAR
+				</h2>
+			</div>
 			<div className="w-full mb-10">
 				<h1 className="font-bold text-2xl">Program Listesi</h1>
 				<h1

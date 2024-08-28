@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState } from "react";
 config();
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api";
 
 export interface ProgramContextType {
 	programs: Program[];
@@ -20,9 +20,9 @@ const ProgramContext = createContext<ProgramContextType | undefined>(undefined);
 
 const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	const [programs, setPrograms] = useState<Program[]>([]);
-	const addProgramEndpoint = BASE_URL + `admin/file`;
-	const getProgramsEndpoint = BASE_URL + `files`;
-	const addFileEndpoint = BASE_URL + `admin/upload`;
+	const addProgramEndpoint = BASE_URL + `/admin/file`;
+	const getProgramsEndpoint = BASE_URL + `/files`;
+	const addFileEndpoint = BASE_URL + `/admin/upload`;
 	const router = useRouter();
 
 	const getPrograms = async () => {
@@ -50,7 +50,7 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 	const addProgram = async (program: Program) => {
 		try {
 			const data = {
-				name: program.name,
+				name: program.name.trim(),
 				type: program.type,
 				directorateList: program.directorateList,
 				users: program.users,

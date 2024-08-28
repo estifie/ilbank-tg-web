@@ -20,7 +20,7 @@ import * as React from "react";
 import { toast } from "sonner";
 config();
 
-const PDF_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080";
+const PDF_BASE_URL = process.env.NEXT_PUBLIC_FILE_URL || "http://172.16.0.195:8080";
 
 export enum ColumnName {
 	"code" = "Program Kodu",

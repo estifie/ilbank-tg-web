@@ -44,4 +44,8 @@ export const kullaniciTurListesi = [
 		id: "başkan",
 		label: "Başkan",
 	},
+	{
+		id: "baskanUstu",
+		label: "Başkan Üstü",
+	},
 ] as const;

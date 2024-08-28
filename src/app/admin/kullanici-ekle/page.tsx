@@ -8,6 +8,7 @@ import { useAuth } from "@context/AuthContext";
 import withAuth from "@hoc/withAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -41,7 +42,27 @@ function ProgramEkle() {
 	}
 
 	return (
-		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1">
+		<main className="min-h-screen flex flex-col items-center p-4 md:p-12   md:pt-12 flex-1">
+			<div className=" w-full flex flex-col justify-center items-center">
+				<Image
+					src="/wide-logo.png"
+					alt="Logo"
+					width={369 / 1.2}
+					height={83 / 1.2}
+					className="mb-8"
+					style={{
+						userSelect: "none",
+						pointerEvents: "none",
+					}}
+					draggable={false}
+				/>
+				<h2 className="text-md font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİLİŞİM AĞLARI VE ALTYAPI SİSTEMLERİ MÜDÜRLÜĞÜ
+				</h2>
+				<h2 className="text-xl font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİRİM VE SÜREÇ BAZLI PROGRAMLAR
+				</h2>
+			</div>
 			<div className="w-full mb-10">
 				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.back()} />
 

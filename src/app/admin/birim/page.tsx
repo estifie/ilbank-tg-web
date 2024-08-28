@@ -42,6 +42,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { ArrowLeft, Check, ChevronDown, ChevronsUpDown } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -53,7 +54,7 @@ function AdminDepartments() {
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = React.useState({});
-	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 5 });
+	const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 20 });
 	const [data, setData] = React.useState<Department[]>([]);
 	const { getDepartments, departments, removeDepartment } = useDepartments();
 	const router = useRouter();
@@ -97,7 +98,27 @@ function AdminDepartments() {
 	}, [departments]);
 
 	return (
-		<main className="min-h-screen flex flex-col items-center p-4 md:p-24 flex-1 justify-center">
+		<main className="min-h-screen flex flex-col p-4 md:p-12  md:pt-12 flex-1">
+			<div className=" w-full flex flex-col justify-center items-center">
+				<Image
+					src="/wide-logo.png"
+					alt="Logo"
+					width={369 / 1.2}
+					height={83 / 1.2}
+					className="mb-8"
+					style={{
+						userSelect: "none",
+						pointerEvents: "none",
+					}}
+					draggable={false}
+				/>
+				<h2 className="text-md font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİLİŞİM AĞLARI VE ALTYAPI SİSTEMLERİ MÜDÜRLÜĞÜ
+				</h2>
+				<h2 className="text-xl font-bold select-none pointer-events-none -mt-5 mb-5">
+					BİRİM VE SÜREÇ BAZLI PROGRAMLAR
+				</h2>
+			</div>
 			<div className="w-full mb-10">
 				<ArrowLeft className="cursor-pointer mb-6 h-12 w-12" onClick={() => router.back()} />
 
@@ -113,7 +134,6 @@ function AdminDepartments() {
 					menüden sütunları gösterebilir veya gizleyebilirsiniz.
 				</h1>
 			</div>
-
 			<div className="w-full">
 				<div className="flex items-center justify-between py-4">
 					<div className="flex flex-row">

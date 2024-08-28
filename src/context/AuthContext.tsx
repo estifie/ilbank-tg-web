@@ -6,7 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 config();
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api/";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://172.16.0.195:8080/tg/api";
 
 interface UserLoginType {
 	username: string;
@@ -55,6 +55,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 	const addUser = async (credentials: UserLoginType) => {
 		try {
 			const response = await api.post(BASE_URL + "/admin/register", credentials);
+			credentials.username = credentials.username.trim();
 			const token = response.data.token;
 			Cookies.set("jwtToken", token);
 			setJwtToken(token || null);
