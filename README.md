@@ -51,7 +51,7 @@ NEXT_PUBLIC_API_URL=https://IP_OF_THE_SERVER/tg/api
 ```
 
     You can get the API server from the [ILBANK Technical Support Guideline API](
-        https://github.com/axelnt/ilbank-tg-api.git) repository.
+        https://github.com/KBarisK/TechSupBackend.git) repository.
 
 6.1. Then, you will be able to start the development server with the following command:
 
