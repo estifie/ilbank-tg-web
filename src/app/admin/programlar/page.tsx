@@ -84,9 +84,7 @@ function AdminPrograms() {
 
 	React.useEffect(() => {
 		getDirectorates().then((directorates) => {
-			getPrograms().then((programs) => {
-				console.log("Programlar alındı:", programs);
-			});
+			getPrograms().then((programs) => {});
 		});
 	}, []);
 
@@ -95,8 +93,6 @@ function AdminPrograms() {
 		if (selectedButton === -3) {
 			setData(programs);
 		} else {
-			console.log("selectedButton", selectedButton);
-			console.log(directorates[selectedButton]);
 			setData(
 				programs.filter((program) => program.directorateList?.includes(directorates[selectedButton].name!)),
 			);

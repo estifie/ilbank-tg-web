@@ -84,8 +84,6 @@ function ProgramEkle() {
 
 		userList = Array.from(new Set(userList));
 
-		console.log("Program ekleme", values);
-
 		addProgram({
 			name: values.programAdi,
 			type: values.programTuru,
@@ -135,9 +133,7 @@ function ProgramEkle() {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					onError={(errors) => {
-						console.log(errors);
-					}}
+					onError={(errors) => {}}
 					className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full"
 				>
 					<FormField

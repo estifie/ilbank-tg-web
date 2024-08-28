@@ -56,7 +56,6 @@ const GetProgramCell = ({ row }: { row: any }) => {
 
 	React.useEffect(() => {
 		getProgramExtension(row.original.code).then((data) => {
-			console.log(data);
 			setExtension(data);
 		});
 	}, []);

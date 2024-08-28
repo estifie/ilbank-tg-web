@@ -27,10 +27,7 @@ const DepartmentProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 	const getDepartments = async () => {
 		setLoading(true);
 		try {
-			console.log("Departmanlar alınıyor...");
-			console.log(getDepartmentsEndpoint);
 			const response = await axios.get(getDepartmentsEndpoint);
-			console.log("Departmanlar alındı:", response.data);
 
 			const names = response.data;
 			setDepartments(names);

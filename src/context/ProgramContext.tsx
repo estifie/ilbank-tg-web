@@ -30,21 +30,15 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 			const response = await axios.get(getProgramsEndpoint);
 			setPrograms(response.data);
 
-			console.log("Programlar alındı:", response.data);
-
 			return response.data;
-		} catch (error) {
-			console.error("Programlar sunucudan alınamadı:", error);
-		}
+		} catch (error) {}
 	};
 
 	const getProgramExtension = async (code: string) => {
 		try {
 			const response = await axios.get(`${getProgramsEndpoint}/extension/${code}`);
 			return response.data;
-		} catch (error) {
-			console.error("Program uzantısı alınamadı:", error);
-		}
+		} catch (error) {}
 	};
 
 	const addProgram = async (program: Program) => {
@@ -90,7 +84,6 @@ const ProgramProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
 			});
 
 			if (response.status === 202) {
-				console.log("Dosya yüklendi");
 			} else {
 				console.error("Dosya yüklenemedi");
 			}

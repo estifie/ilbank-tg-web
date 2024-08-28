@@ -47,7 +47,6 @@ const ActionsCell = ({ row }: { row: any }) => {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={() => {
-						console.log(row.original.code);
 						removeProgram(row.original.code!).then(() => {
 							getDirectorates().then(() => {
 								getPrograms();
@@ -70,7 +69,6 @@ const GetProgramCell = ({ row }: { row: any }) => {
 
 	React.useEffect(() => {
 		getProgramExtension(row.original.code).then((data) => {
-			console.log(data);
 			setExtension(data);
 		});
 	}, [getProgramExtension, row]);
