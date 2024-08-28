@@ -59,9 +59,7 @@ NEXT_PUBLIC_API_URL=https://IP_OF_THE_SERVER/tg/api
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-Or, you can build the project for production and start the production server.
+Or, you can build the project for production and start the production server:
 
 6.2. To build the project for production, run the following command:
 
